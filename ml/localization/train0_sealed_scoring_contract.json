@@ -62,5 +62,14 @@
     "bracket_max_observed_ns": 20000000,
     "pre_start_inputs": "replayed for warm-up, not scored",
     "primary_metrics": "raw common-map; start-aligned is diagnostic only"
+  },
+  "rootless_repeat": {
+    "id": "g1-train0-rootless.WfWS4UQV",
+    "original_compose_exit": 1,
+    "offline_validation_exit": 0,
+    "sha256": {
+      "inputs/inputs_0.db3": "b431dfafb704ec8b72d9159147f062091316bb64ffdf21ed92ae81b970a20325",
+      "ground_truth/ground_truth_0.db3": "ac0cafcce5f6be0e3982039daa49620c7f834b688df772dbfc09c47dd8273ca6"
+    }
   }
 }

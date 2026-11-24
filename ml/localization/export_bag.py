@@ -35,8 +35,13 @@ def marked_pilot(bag):
 
 def has_sealed_pilot_storage(*inventories):
     """Identify byte-for-byte copies, including renamed storage and sidecars."""
-    pilot = json.loads(SEALED_PILOT.read_text())['sealed_capture']['sha256']
-    storage_hashes = {digest for name, digest in pilot.items() if name.endswith('.db3')}
+    contract = json.loads(SEALED_PILOT.read_text())
+    storage_hashes = {
+        digest
+        for capture in ('sealed_capture', 'rootless_repeat')
+        for name, digest in contract[capture]['sha256'].items()
+        if name.endswith('.db3')
+    }
     return any(storage_hashes.intersection(files.values()) for files in inventories if files)
 
 
