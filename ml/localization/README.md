@@ -75,6 +75,23 @@ missing sensor/GT streams and invalid frames. Files are hash-locked in manifest.
 GT stays in a separate CSV; the estimator executable never receives that file.
 Memory use currently scales with bag size, so keep recordings bounded.
 
+To reproduce a sensor outage offline in Jazzy, supply a sensor-only SQLite bag
+and a window fixed before scoring. The times below are simulation seconds from
+the target messages' headers.
+
+```bash
+python3 ml/localization/make_sensor_dropout.py /absolute/path/bags/inputs /absolute/path/bags/imu_gap \
+  --sensor imu --start 8.500 --end 10.500
+```
+
+Use `--sensor lidar` to remove scans over the same half-open interval.
+`dropout.json` records the interval, message counts and both bag hashes.
+The tool copies retained serialized messages and their bag receive timestamps.
+Export the derived bag with the original, separate ground-truth sidecar, then
+give A and B the same filtered input. Keep the original episode ID in the
+experiment manifest. Derivatives of previously scored episodes serve as
+paired diagnostics and should be exported with `--split pilot`.
+
 ## 3. Build replay, fit, freeze, evaluate
 
 ```bash
