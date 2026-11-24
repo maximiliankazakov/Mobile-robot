@@ -19,6 +19,7 @@ def stamp(msg):
 GT_TOPIC = '/evaluation/ground_truth'
 GT_TYPE = 'nav_msgs/msg/Odometry'
 PILOT_EVIDENCE = 'evidence=nominal_pilot_not_training_or_scored'
+SEALED_PILOT = Path(__file__).with_name('train0_sealed_scoring_contract.json')
 
 
 def marked_pilot(bag):
@@ -32,8 +33,16 @@ def marked_pilot(bag):
     return False
 
 
-def dataset_source(split, bags, synthetic):
-    if any(marked_pilot(bag) for bag in bags) and split != 'pilot':
+def has_sealed_pilot_storage(*inventories):
+    """Identify byte-for-byte copies, including renamed storage and sidecars."""
+    pilot = json.loads(SEALED_PILOT.read_text())['sealed_capture']['sha256']
+    storage_hashes = {digest for name, digest in pilot.items() if name.endswith('.db3')}
+    return any(storage_hashes.intersection(files.values()) for files in inventories if files)
+
+
+def dataset_source(split, bags, synthetic, *inventories):
+    if split != 'pilot' and (any(marked_pilot(bag) for bag in bags)
+                             or has_sealed_pilot_storage(*inventories)):
         raise ValueError('Known pilot inputs require --split pilot; not train/validation/test')
     if synthetic:
         return 'synthetic_fixture'
@@ -95,13 +104,13 @@ def main():
     p.add_argument('--storage', default='sqlite3')
     args = p.parse_args()
     bags = [args.bag, args.ground_truth_bag] if args.ground_truth_bag else [args.bag]
-    source = dataset_source(args.split, bags, args.synthetic_fixture)
     if args.ground_truth_storage and not args.ground_truth_bag:
         p.error('--ground-truth-storage requires --ground-truth-bag')
     if args.ground_truth_bag and args.ground_truth_bag.resolve() == args.bag.resolve():
         p.error('Ground truth sidecar must be a separate bag')
     bag_hashes = inventory(args.bag)
     gt_hashes = inventory(args.ground_truth_bag) if args.ground_truth_bag else None
+    source = dataset_source(args.split, bags, args.synthetic_fixture, bag_hashes, gt_hashes)
     needed = {'/sensors/wheel_odom', '/sensors/imu', '/sensors/scan', '/map', '/tf_static'}
     messages = read_bag(args.bag, args.storage, needed if args.ground_truth_bag else needed | {GT_TOPIC},
                         exclude_embedded=bool(args.ground_truth_bag))

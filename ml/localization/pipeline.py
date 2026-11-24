@@ -6,6 +6,7 @@ import json
 import subprocess
 from pathlib import Path
 import numpy as np
+from export_bag import has_sealed_pilot_storage
 
 BASE = np.array([.04**2, .04**2, .025**2])
 LOW = np.array([1e-5]*3)
@@ -21,6 +22,8 @@ def load_dataset(path):
     m = json.loads((path/'manifest.json').read_text())
     if m['schema'] != 1 or m['source'] != 'recorded_rosbag':
         raise ValueError('Only explicitly recorded_rosbag datasets accepted by the experiment pipeline')
+    if has_sealed_pilot_storage(m.get('bag_file_sha256'), m.get('ground_truth_bag_file_sha256')):
+        raise ValueError('Known pilot storage hashes are ineligible for training or scoring')
     if not m.get('world_sha256') or set(m['sha256']) != {'map.txt', 'events.txt', 'ground_truth.csv'}:
         raise ValueError('Required provenance/hash fields missing')
     for name, expected in m['sha256'].items():
@@ -34,6 +37,8 @@ def load_dataset(path):
 def validate_splits(items):
     worlds, trajectories, world_hashes, event_hashes = {}, {}, {}, {}
     for _, m in items:
+        if has_sealed_pilot_storage(m.get('bag_file_sha256'), m.get('ground_truth_bag_file_sha256')):
+            raise ValueError('Known pilot storage hashes are ineligible for training or scoring')
         for table, key in [(worlds, m['world']), (trajectories, m['trajectory'])]:
             if key in table and table[key] != m['split']:
                 raise ValueError(f'Split leakage for {key}')

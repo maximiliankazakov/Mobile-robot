@@ -138,5 +138,10 @@ the two sidecar folders and the recorded, declared initial pose and world→map
 transform. Outputs are marked recorded_pilot and are not eligible for model
 training, validation or scoring. The exporter also rejects other split values
 when the source path or adjacent provenance identifies this HW1 pilot. Keep
-provenance with any copied bag; this guard is not a substitute for maintaining
-the experiment's disjoint, predeclared splits.
+provenance with any copied bag. For the sealed train_0 commissioning capture,
+the exporter also rejects unchanged SQLite storage copies renamed or moved
+outside their original folders. It checks both input and evaluator-sidecar
+storage hashes. The training/evaluation pipeline checks these hashes again
+from exported manifests, including the training datasets embedded in the
+model card. This guard does not replace the disjoint, predeclared split
+manifest or establish provenance for re-encoded copies.

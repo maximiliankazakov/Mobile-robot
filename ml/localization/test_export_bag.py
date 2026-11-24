@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 
-@unittest.skipUnless(importlib.util.find_spec('rosbag2_py'), 'Source ROS 2 Humble for rosbag test')
+@unittest.skipUnless(importlib.util.find_spec('rosbag2_py'), 'Source ROS 2 for rosbag test')
 class BagExportTest(unittest.TestCase):
     def test_synthetic_rosbag_export_and_experiment_rejection(self):
         import rosbag2_py
@@ -27,7 +27,12 @@ class BagExportTest(unittest.TestCase):
                            '/sensors/imu':'sensor_msgs/msg/Imu', '/sensors/wheel_odom':'nav_msgs/msg/Odometry',
                            '/sensors/scan':'sensor_msgs/msg/LaserScan', '/evaluation/ground_truth':'nav_msgs/msg/Odometry'}
             for topic, kind in definitions.items():
-                writer.create_topic(rosbag2_py.TopicMetadata(name=topic, type=kind, serialization_format='cdr'))
+                fields = dict(name=topic, type=kind, serialization_format='cdr')
+                try:
+                    metadata = rosbag2_py.TopicMetadata(id=0, **fields)  # Jazzy
+                except TypeError:
+                    metadata = rosbag2_py.TopicMetadata(**fields)  # Humble
+                writer.create_topic(metadata)
             grid=OccupancyGrid();grid.header.frame_id='map';grid.info.width=2;grid.info.height=2
             grid.info.resolution=.1;grid.info.origin.orientation.w=1.;grid.data=[0,0,0,100]
             writer.write('/map', serialize_message(grid), 1)

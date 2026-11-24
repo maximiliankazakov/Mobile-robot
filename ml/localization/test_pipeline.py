@@ -1,4 +1,5 @@
 """Synthetic unit fixtures only. These are NOT capstone experiment results."""
+import json
 import os
 from pathlib import Path
 import tempfile
@@ -8,6 +9,24 @@ import pipeline as p
 
 
 class PipelineTest(unittest.TestCase):
+    def test_old_manifest_with_pilot_sidecar_is_ineligible(self):
+        contract = Path(__file__).with_name('train0_sealed_scoring_contract.json')
+        hashes = json.loads(contract.read_text())['sealed_capture']['sha256']
+        manifest = {
+            'schema': 1, 'source': 'recorded_rosbag', 'split': 'train',
+            'ground_truth_bag_file_sha256': {
+                'renamed.db3': hashes['ground_truth/ground_truth_0.db3'],
+            },
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path/'manifest.json').write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'pilot storage hashes'):
+                p.load_dataset(path)
+        # Evaluation also checks the original datasets embedded in training.json.
+        with self.assertRaisesRegex(ValueError, 'pilot storage hashes'):
+            p.validate_splits([(None, manifest)])
+
     def test_split_leakage(self):
         a = dict(world='a', trajectory='a1', split='train')
         b = dict(world='a', trajectory='b1', split='test')
