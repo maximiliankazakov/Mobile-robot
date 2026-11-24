@@ -2,8 +2,8 @@ capture_id,split,layout,layout_seed,scenario,scenario_seed,route_id,status
 g1-train_0-nominal-0000,train,train_0,0,nominal,0,route_sf_train_0_nominal_00,planned_pending_map_and_route
 g1-train_1-nominal-0001,train,train_1,1,nominal,1,route_sf_train_1_nominal_00,recorded_verified_train
 g1-train_2-nominal-0002,train,train_2,2,nominal,2,route_sf_train_2_nominal_00,recorded_verified_train
-g1-val_0-nominal-1000,validation,val_0,1000,nominal,1000,route_sf_val_0_nominal_00,planned_pending_map_and_route
-g1-test_0-nominal-00,test,test_0,2000,nominal,2000,route_sf_test_0_nominal_00,planned_pending_map_and_route
+g1-val_0-nominal-1000,validation,val_0,1000,nominal,1000,route_sf_val_0_nominal_00,recorded_verified_validation
+g1-test_0-nominal-00,test,test_0,2000,nominal,2000,route_sf_test_0_nominal_00,recorded_scored_nominal
 g1-test_0-nominal-01,test,test_0,2000,nominal,2001,route_sf_test_0_nominal_01,planned_pending_map_and_route
 g1-test_0-nominal-02,test,test_0,2000,nominal,2002,route_sf_test_0_nominal_02,planned_pending_map_and_route
 g1-test_0-nominal-03,test,test_0,2000,nominal,2003,route_sf_test_0_nominal_03,planned_pending_map_and_route
@@ -13,7 +13,7 @@ g1-test_0-nominal-06,test,test_0,2000,nominal,2006,route_sf_test_0_nominal_06,pl
 g1-test_0-nominal-07,test,test_0,2000,nominal,2007,route_sf_test_0_nominal_07,planned_pending_map_and_route
 g1-test_0-nominal-08,test,test_0,2000,nominal,2008,route_sf_test_0_nominal_08,planned_pending_map_and_route
 g1-test_0-nominal-09,test,test_0,2000,nominal,2009,route_sf_test_0_nominal_09,planned_pending_map_and_route
-g1-test_1-nominal-00,test,test_1,2001,nominal,2010,route_sf_test_1_nominal_00,planned_pending_map_and_route
+g1-test_1-nominal-00,test,test_1,2001,nominal,2010,route_sf_test_1_nominal_00,recorded_scored_nominal
 g1-test_1-nominal-01,test,test_1,2001,nominal,2011,route_sf_test_1_nominal_01,planned_pending_map_and_route
 g1-test_1-nominal-02,test,test_1,2001,nominal,2012,route_sf_test_1_nominal_02,planned_pending_map_and_route
 g1-test_1-nominal-03,test,test_1,2001,nominal,2013,route_sf_test_1_nominal_03,planned_pending_map_and_route
