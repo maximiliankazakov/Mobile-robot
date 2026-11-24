@@ -34,11 +34,13 @@ if [[ ! -r "$setup" ]]; then
 fi
 source "$setup"
 pids=()
+source "$here/stop_children.sh"
 cleanup() {
-  if (( ${#pids[@]} )); then
-    kill "${pids[@]}" 2>/dev/null || true
-    wait "${pids[@]}" 2>/dev/null || true
-  fi
+  local status=$?
+  trap - EXIT
+  g1_stop_children "${pids[@]}" || { if ((status == 0)); then status=1; fi; }
+  echo "G1 smoke: cleanup exit=$status"
+  exit "$status"
 }
 trap cleanup EXIT
 trap 'exit 130' INT
@@ -54,4 +56,7 @@ if [[ "$mode" == real ]]; then
 fi
 python3 "$here/fixture.py" "$mode" &
 pids+=("$!")
-python3 "$here/fixture.py" check
+check_status=0
+timeout --signal=TERM --kill-after=3s 20s python3 "$here/fixture.py" check || check_status=$?
+echo "G1 smoke: checker exit=$check_status"
+exit "$check_status"
