@@ -64,11 +64,13 @@ timeout -k 8s "$run_limit" docker compose --profile dev run \
     source /etc/os-release
     test "$ID" = ubuntu && test "$VERSION_ID" = 24.04 || exit 2
     source /opt/ros/jazzy/setup.bash
+    # The container user may not own the bind-mounted workspace in rootless Docker.
+    stage="$(mktemp -d /tmp/g1-course.XXXXXXXX)"
+    export ROS_LOG_DIR="$stage/ros-log" COLCON_HOME="$stage/colcon"
     dir=/workspace/integration/g1_v1
     case "$1" in
       mock) exec bash "$dir/smoke.sh" mock ;;
       real)
-        stage="$(mktemp -d /tmp/g1-course-build.XXXXXXXX)"
         MAKEFLAGS=-j2 colcon --log-base "$stage/log" build \
           --base-paths ros2_ws/src/capstone_localization \
           --build-base "$stage/build" --install-base "$stage/install" \
