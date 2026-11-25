@@ -26,7 +26,7 @@ if [[ ! -x "$work/install/capstone_localization/lib/capstone_localization/locali
   "${base[@]}" "$image" -ec '
     source /opt/ros/jazzy/setup.bash
     cd /work
-    MAKEFLAGS=-j2 colcon --log-base log build --base-paths /workspace/ros2_ws/src/capstone_localization       --packages-select capstone_localization --executor sequential
+    MAKEFLAGS=-j2 colcon --log-base log build --base-paths /workspace/ros2_ws/src/capstone_localization       --packages-select capstone_localization --executor sequential --cmake-args -DCMAKE_BUILD_TYPE=Release
   '
 fi
 if [[ "$mode" == replay ]]; then
