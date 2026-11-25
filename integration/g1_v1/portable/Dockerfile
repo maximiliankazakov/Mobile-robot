@@ -7,7 +7,8 @@ RUN source /opt/ros/jazzy/setup.bash \
     && MAKEFLAGS=-j2 colcon build --base-paths /src --install-base /opt/g1/install \
          --packages-select capstone_localization --executor sequential \
          --cmake-args -DCMAKE_BUILD_TYPE=Release \
-    && colcon test --packages-select capstone_localization --return-code-on-test-failure \
+    && colcon test --base-paths /src --install-base /opt/g1/install \
+         --packages-select capstone_localization --return-code-on-test-failure \
     && colcon test-result --verbose
 
 FROM ${G1_ROS_BASE} AS g1
