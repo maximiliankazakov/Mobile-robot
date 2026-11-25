@@ -25,10 +25,17 @@ target_link_libraries(localization_node ${PROJECT_NAME}_core)
 target_compile_options(localization_node PRIVATE -Wall -Wextra -Wpedantic)
 add_executable(localization_replay src/replay.cpp)
 target_link_libraries(localization_replay ${PROJECT_NAME}_core)
-install(TARGETS localization_replay localization_node DESTINATION lib/${PROJECT_NAME})
+add_executable(localization_metrics src/metrics.cpp)
+target_link_libraries(localization_metrics ${PROJECT_NAME}_core)
+target_compile_options(localization_metrics PRIVATE -Wall -Wextra -Wpedantic)
+install(TARGETS localization_replay localization_node localization_metrics DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(Python3 REQUIRED COMPONENTS Interpreter)
+  add_test(NAME localization_metrics_cli
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/check_metrics.py
+    $<TARGET_FILE:localization_metrics>)
   ament_add_gtest(test_localization_node test/test_localization_node.cpp)
   target_link_libraries(test_localization_node ${PROJECT_NAME}_core)
   ament_add_gtest(test_estimator test/test_estimator.cpp)
