@@ -56,6 +56,7 @@ class Drive(Node):
         self.error = None
         self.localized = False
         self.timing = {"first_clock": None, "first_nonzero_command": None}
+        self.sensor_pauses = []
         self.trace = []
         self.applied = []
         self.reached = []
@@ -175,6 +176,7 @@ class Drive(Node):
         next_tick = started_at
         settled_at = None
         safety_stopped = None
+        inputs_stopped = None
         while time.monotonic() < deadline and not self.cancel:
             rclpy.spin_once(self, timeout_sec=.015)
             now = time.monotonic()
@@ -188,8 +190,18 @@ class Drive(Node):
             if start is None and self.clock is not None:
                 self.send()
             if self.clock is None or not self.ready(now, stamp(self.clock)):
-                require(start is None and now-started_at < 35, "missing or stale control input")
+                if start is None:
+                    require(now - started_at < 35, "missing control input before start")
+                    continue
+                if inputs_stopped is None:
+                    inputs_stopped = now
+                    print("Waiting at zero speed for fresh control inputs", flush=True)
+                self.send()
+                require(now - inputs_stopped < 1.25, "stale control input did not recover")
                 continue
+            if inputs_stopped is not None:
+                self.sensor_pauses.append(now - inputs_stopped)
+                inputs_stopped = None
             sim = stamp(self.clock)
             if start is None:
                 if self.safety != "OK" or not publishers:
@@ -248,7 +260,7 @@ def main():
             time.sleep(.05)
         (RUN / "drive.json").write_text(json.dumps(dict(complete=complete, failure=reason, local_route=route,
             columns=["sim_s","x","y","yaw","goal","raw_v","raw_w","nearest_range","front_range"],
-            reached=node.reached, samples=node.trace, applied=node.applied, timing=node.timing, last_scan=node.nearest_scan))+"\n")
+            reached=node.reached, samples=node.trace, applied=node.applied, timing=node.timing, last_scan=node.nearest_scan, sensor_pauses_s=node.sensor_pauses))+"\n")
         node.destroy_node()
         rclpy.try_shutdown()
 
