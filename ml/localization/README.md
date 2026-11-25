@@ -1,5 +1,7 @@
 # G1 reproducible data → training → held-out A/B
 
+Итоговый эксперимент и команды сдачи собраны в [инструкции G1](g1_course_submission.md).
+
 **Course target: Ubuntu 24.04 / ROS 2 Jazzy in Docker.** The Humble commands
 below document the historical local workflow, not the reference build or final
 verification path. Start with the [G1 integration fixture](../../integration/g1_v1/README.md),
