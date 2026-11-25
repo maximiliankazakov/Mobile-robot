@@ -13,8 +13,7 @@ METHODS = ("A", "B", "B-no-history")
 
 
 def verify(path, digest):
-    with path.open("rb") as data:
-        actual = hashlib.file_digest(data, "sha256").hexdigest()
+    actual = hashlib.sha256(path.read_bytes()).hexdigest()
     if actual != digest:
         raise ValueError(f"Artifact hash mismatch: {path}")
 
@@ -96,19 +95,19 @@ def summarize(scores, args):
         has_gap = "gap" in rows[0]["variants"]
         variant, metric = ("gap", "ate_rmse_window_m") if has_gap else ("observed", "ate_rmse_m")
         values = lambda method: lambda row: row["variants"][variant][method][metric]
-        primary = aggregate(args.executable,args.results,scenario,values("A"),values("B"))
-        history = aggregate(args.executable,args.results,scenario+"-ablation",values("A"),values("B-no-history"))
+        primary = aggregate(args.executable,args.results,scenario,rows,values("A"),values("B"))
+        history = aggregate(args.executable,args.results,scenario+"-ablation",rows,values("A"),values("B-no-history"))
         result[scenario] = {"primary":primary, "ablation":history, "window":metric}
         if has_gap:
             for method in ("A","B"):
                 intact = lambda row: row["variants"]["intact"][method][metric]
-                penalty = aggregate(args.executable,args.results,f"{scenario}-penalty-{method}",
+                penalty = aggregate(args.executable,args.results,f"{scenario}-penalty-{method}",rows,
                                     intact,values(method))
                 result[scenario][f"{method}_gap_minus_intact"] = penalty
             def penalty(method):
                 return lambda row: row["variants"]["gap"][method][metric] - row["variants"]["intact"][method][metric]
             result[scenario]["difference_of_gap_penalties"] = aggregate(
-                args.executable,args.results,f"{scenario}-penalty-difference",penalty("A"),penalty("B"))
+                args.executable,args.results,f"{scenario}-penalty-difference",rows,penalty("A"),penalty("B"))
     (args.results / "summary.json").write_text(json.dumps(result,indent=2,allow_nan=False)+"\n")
 
 
